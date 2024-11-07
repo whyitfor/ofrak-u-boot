@@ -22,7 +22,7 @@ async def main(ofrak_context: OFRAKContext):
     program_attributes = ProgramAttributes(
         InstructionSet.ARM,
         bit_width=BitWidth.BIT_32,
-        endianness=Endianness.LITTLE_ENDIAN,\
+        endianness=Endianness.LITTLE_ENDIAN,
         sub_isa=None,
         processor=None,
     )
@@ -35,16 +35,19 @@ async def main(ofrak_context: OFRAKContext):
     )
     await resource.run(GhidraProjectAnalyzer, config=config)
     data_length = await resource.get_data_length()
-    resource.add_view(CodeRegion(
-        virtual_address=0,
-        size=data_length,
-    ))
+    resource.add_view(
+        CodeRegion(
+            virtual_address=0,
+            size=data_length,
+        )
+    )
     await resource.save()
     await resource.run(GhidraCodeRegionUnpacker)
     complex_blocks = await resource.get_descendants_as_view(
         v_type=ComplexBlock, r_filter=ResourceFilter(tags=(ComplexBlock,))
     )
     print(complex_blocks)
+
 
 if __name__ == "__main__":
     o = OFRAK()

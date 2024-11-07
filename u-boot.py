@@ -17,8 +17,6 @@ async def main(ofrak_context: OFRAKContext):
     parser.add_argument("--gzf", default="assets/u-boot.bin.gzf")
     args = parser.parse_args()
     resource = await ofrak_context.create_root_resource_from_file(args.file)
-
-    await resource.flush_data_to_disk(f"{args.file}.modified")
     program_attributes = ProgramAttributes(
         InstructionSet.ARM,
         bit_width=BitWidth.BIT_32,
@@ -43,21 +41,30 @@ async def main(ofrak_context: OFRAKContext):
     )
     await resource.save()
     await resource.run(GhidraCodeRegionUnpacker)
-    complex_blocks = await resource.get_descendants_as_view(
-        v_type=ComplexBlock, r_filter=ResourceFilter(tags=(ComplexBlock,))
+    version_block = await resource.get_only_descendant_as_view(
+        v_type=ComplexBlock,
+        r_filter=ResourceFilter(
+            tags=(ComplexBlock,),
+            attribute_filters=[
+                ResourceAttributeValueFilter(
+                    attribute=ComplexBlock.Symbol, value="version"
+                )
+            ],
+        ),
     )
     resource.add_tag(Program)
     await resource.save()
     program = await resource.view_as(Program)
     symbols = {}
-    for cb in complex_blocks:
-        symbols[cb.name] = (cb.virtual_address, LinkableSymbolType.FUNC)
+    symbols[version_block.name] = (
+        version_block.virtual_address,
+        LinkableSymbolType.FUNC,
+    )
     await program.define_linkable_symbols(symbols)
-    print(complex_blocks)
 
 
 if __name__ == "__main__":
-    o = OFRAK()
+    o = OFRAK(logging_level=5)
     import ofrak_ghidra
 
     o.discover(ofrak_ghidra)

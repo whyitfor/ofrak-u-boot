@@ -46,6 +46,13 @@ async def main(ofrak_context: OFRAKContext):
     complex_blocks = await resource.get_descendants_as_view(
         v_type=ComplexBlock, r_filter=ResourceFilter(tags=(ComplexBlock,))
     )
+    resource.add_tag(Program)
+    await resource.save()
+    program = await resource.view_as(Program)
+    symbols = {}
+    for cb in complex_blocks:
+        symbols[cb.name] = (cb.virtual_address, LinkableSymbolType.FUNC)
+    await program.define_linkable_symbols(symbols)
     print(complex_blocks)
 
 

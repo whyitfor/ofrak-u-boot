@@ -41,13 +41,41 @@ async def main(ofrak_context: OFRAKContext):
     )
     await resource.save()
     await resource.run(GhidraCodeRegionUnpacker)
+    cbs = await resource.get_descendants_as_view(
+        v_type=ComplexBlock, r_filter=ResourceFilter(tags=(ComplexBlock,))
+    )
+    import ipdb
+
+    ipdb.set_trace()
     version_block = await resource.get_only_descendant_as_view(
         v_type=ComplexBlock,
         r_filter=ResourceFilter(
             tags=(ComplexBlock,),
             attribute_filters=[
                 ResourceAttributeValueFilter(
-                    attribute=ComplexBlock.Symbol, value="version"
+                    attribute=ComplexBlock.Symbol, value="do_version"
+                )
+            ],
+        ),
+    )
+    printf_block = await resource.get_only_descendant_as_view(
+        v_type=ComplexBlock,
+        r_filter=ResourceFilter(
+            tags=(ComplexBlock,),
+            attribute_filters=[
+                ResourceAttributeValueFilter(
+                    attribute=ComplexBlock.Symbol, value="printf"
+                )
+            ],
+        ),
+    )
+    help_block = await resource.get_only_descendant_as_view(
+        v_type=ComplexBlock,
+        r_filter=ResourceFilter(
+            tags=(ComplexBlock,),
+            attribute_filters=[
+                ResourceAttributeValueFilter(
+                    attribute=ComplexBlock.Symbol, value="do_help"
                 )
             ],
         ),
